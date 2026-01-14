@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "210413327992",
+    "project_id": "hwyyiikjknaytutuyd",
+    "storage_bucket": "hwyyiikjknaytutuyd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:210413327992:android:97db684a90b598b9ef7f8d",
+        "android_client_info": {
+          "package_name": "com.noticias.yodev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdSP6Mq0C42SzRhStHDhCF3keBQeUjxkw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
