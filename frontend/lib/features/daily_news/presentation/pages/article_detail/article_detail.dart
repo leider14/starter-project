@@ -1,48 +1,65 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ionicons/ionicons.dart';
-import '../../../../../injection_container.dart';
 import '../../../domain/entities/article.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
+import '../../bloc/article/local/local_article_state.dart';
+import '../../widgets/mywdg_appbar.dart';
+import '../../widgets/mywdg_floatingbutton.dart';
 
-class ArticleDetailsView extends HookWidget {
+class ArticleDetailsView extends StatelessWidget {
   final ArticleEntity? article;
 
   const ArticleDetailsView({Key? key, this.article}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<LocalArticleBloc>(),
-      child: Scaffold(
-        appBar: _buildAppBar(),
-        body: _buildBody(),
-        floatingActionButton: _buildFloatingActionButton(),
-      ),
+    return BlocBuilder<LocalArticleBloc, LocalArticlesState>(
+      builder: (context, state) {
+        bool isBookmarked = false;
+        if (state is LocalArticlesDone) {
+          isBookmarked = state.articles!.any((a) => a.title == article!.title);
+        }
+        return Scaffold(
+          appBar: _buildAppBar(),
+          body: _buildBody(context),
+          floatingActionButton:
+              _buildFloatingActionButton(context, isBookmarked),
+        );
+      },
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      leading: Builder(
-        builder: (context) => GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => _onBackButtonTapped(context),
-          child: const Icon(Ionicons.chevron_back, color: Colors.black),
-        ),
-      ),
+    return const MyWdgAppbar(
+      title: 'Article Details',
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
+      child: Stack(
         children: [
-          _buildArticleTitleAndDate(),
           _buildArticleImage(),
-          _buildArticleDescription(),
+          Container(
+            margin: const EdgeInsets.only(top: 200),
+            padding: const EdgeInsets.only(top: 20),
+            decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(20),
+                )),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildArticleTitleAndDate(),
+                _buildAuthorSection(context),
+                _buildArticleDescription(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -80,12 +97,82 @@ class ArticleDetailsView extends HookWidget {
     );
   }
 
+  Widget _buildAuthorSection(BuildContext context) {
+    if (article?.userId == null || article!.userId!.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
+        child: Text(
+          'Author: ${article?.author ?? 'Unknown'}',
+          style: const TextStyle(
+              fontSize: 14, fontStyle: FontStyle.italic, color: Colors.grey),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, '/Profile', arguments: article!.userId);
+        },
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.withOpacity(0.1)),
+          ),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.blueAccent,
+                child: Icon(Icons.person, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      article?.author ?? 'Unknown Author',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const Text(
+                      'View Profile',
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.blueAccent),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildArticleImage() {
     return Container(
+      color: const Color.fromARGB(255, 235, 235, 235),
       width: double.maxFinite,
       height: 250,
-      margin: const EdgeInsets.only(top: 14),
-      child: Image.network(article!.urlToImage!, fit: BoxFit.cover),
+      child: CachedNetworkImage(
+        imageUrl: article!.urlToImage!,
+        fit: BoxFit.cover,
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
   }
 
@@ -99,26 +186,31 @@ class ArticleDetailsView extends HookWidget {
     );
   }
 
-  Widget _buildFloatingActionButton() {
-    return Builder(
-      builder: (context) => FloatingActionButton(
-        onPressed: () => _onFloatingActionButtonPressed(context),
-        child: const Icon(Ionicons.bookmark, color: Colors.white),
-      ),
+  Widget _buildFloatingActionButton(BuildContext context, bool isBookmarked) {
+    return MyWdgFloatingButton(
+      isActive: isBookmarked,
+      onPressed: () => _onFloatingActionButtonPressed(context, isBookmarked),
+      icon: isBookmarked ? Ionicons.bookmark : Ionicons.bookmark_outline,
     );
   }
 
-  void _onBackButtonTapped(BuildContext context) {
-    Navigator.pop(context);
-  }
-
-  void _onFloatingActionButtonPressed(BuildContext context) {
-    BlocProvider.of<LocalArticleBloc>(context).add(SaveArticle(article!));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Colors.black,
-        content: Text('Article saved successfully.'),
-      ),
-    );
+  void _onFloatingActionButtonPressed(BuildContext context, bool isBookmarked) {
+    if (isBookmarked) {
+      BlocProvider.of<LocalArticleBloc>(context).add(RemoveArticle(article!));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.black,
+          content: Text('Article removed successfully.'),
+        ),
+      );
+    } else {
+      BlocProvider.of<LocalArticleBloc>(context).add(SaveArticle(article!));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.black,
+          content: Text('Article saved successfully.'),
+        ),
+      );
+    }
   }
 }
