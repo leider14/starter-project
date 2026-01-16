@@ -40,6 +40,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {

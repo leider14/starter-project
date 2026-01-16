@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyWdgTextField extends StatelessWidget {
-  final String title;
+  final String? title;
   final TextEditingController controller;
   final String hintText;
   final int? maxLines;
@@ -11,11 +11,12 @@ class MyWdgTextField extends StatelessWidget {
   final String? helpText;
   final int? maxLength;
   final bool obscureText;
+  final Function(String)? onSubmitted;
 
   const MyWdgTextField({
     Key? key,
     required this.controller,
-    required this.title,
+    this.title,
     required this.hintText,
     this.maxLines = 1,
     this.padding = const EdgeInsets.all(16),
@@ -24,6 +25,7 @@ class MyWdgTextField extends StatelessWidget {
     this.helpText,
     this.maxLength,
     this.obscureText = false,
+    this.onSubmitted,
   }) : super(key: key);
 
   @override
@@ -33,8 +35,8 @@ class MyWdgTextField extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(
-              title,
+            if(title != null) Text(
+              title!,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -63,7 +65,7 @@ class MyWdgTextField extends StatelessWidget {
             ],
           ],
         ),
-        const SizedBox(height: 8),
+        if (title != null) const SizedBox(height: 8),
         Container(
           padding: padding,
           decoration: BoxDecoration(
@@ -87,6 +89,7 @@ class MyWdgTextField extends StatelessWidget {
             controller: controller,
             maxLines: maxLines,
             maxLength: maxLength,
+            onSubmitted: (value) => onSubmitted != null ? onSubmitted!(value) : null,
             obscureText: obscureText,
             style: const TextStyle(fontSize: 16, color: Colors.black87),
             decoration: InputDecoration(
@@ -119,7 +122,7 @@ class MyWdgTextField extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(title,
+        title: Text(title ?? "Info",
             style: const TextStyle(
                 fontFamily: 'Butler', fontWeight: FontWeight.bold)),
         content: Text(helpText!),

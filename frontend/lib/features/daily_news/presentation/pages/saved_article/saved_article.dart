@@ -6,7 +6,7 @@ import '../../../domain/entities/article.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
 import '../../bloc/article/local/local_article_state.dart';
-import '../../widgets/article_tile.dart';
+import '../../widgets/mywdg_articletile.dart';
 import '../../widgets/mywdg_appbar.dart';
 
 class SavedArticles extends HookWidget {

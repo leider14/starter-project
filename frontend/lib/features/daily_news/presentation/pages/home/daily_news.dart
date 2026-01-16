@@ -7,14 +7,14 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_appbar.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_avatarimage.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_chip.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_featuredcard.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_floatingbutton.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/auth_state.dart';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_appbar.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_textfield.dart';
 import '../../../domain/entities/article.dart';
-import '../../widgets/article_tile.dart';
+import '../../widgets/mywdg_articletile.dart';
 
 class DailyNews extends StatefulWidget {
   final bool showBackButton;
@@ -24,18 +24,31 @@ class DailyNews extends StatefulWidget {
   State<DailyNews> createState() => _DailyNewsState();
 }
 
+class Category {
+  final String key;
+  final String label;
+  final IconData icon;
+
+  const Category({
+    required this.key,
+    required this.label,
+    required this.icon,
+  });
+}
+
+
 class _DailyNewsState extends State<DailyNews> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
   String _selectedCategory = "All";
 
-  final List<String> _categories = [
-    "All",
-    "Technology",
-    "Business",
-    "Nature",
-    "Gossip",
-    "Diversion",
+  final List<Category> _categories = const [
+    Category(key: 'all', label: 'All', icon: Icons.category),
+    Category(key: 'technology', label: 'Technology', icon: Icons.apple),
+    Category(key: 'business', label: 'Business', icon: Icons.monetization_on),
+    Category(key: 'nature', label: 'Nature', icon: Icons.park),
+    Category(key: 'gossip', label: 'Gossip', icon: Icons.emoji_emotions_sharp),
+    Category(key: 'diversion', label: 'Diversion', icon: Icons.rowing_outlined),
   ];
 
   void _onSearchChanged() {
@@ -54,6 +67,7 @@ class _DailyNewsState extends State<DailyNews> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: MyWdgAppbar(
         title: 'Daily News',
         showBackButton: widget.showBackButton,
@@ -93,14 +107,6 @@ class _DailyNewsState extends State<DailyNews> {
         },
         icon: Icons.add,
       ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppbar(BuildContext context) {
-    return MyWdgAppbar(
-      title: 'Daily News',
-      showBackButton: false,
-      actions: [],
     );
   }
 
@@ -147,35 +153,15 @@ class _DailyNewsState extends State<DailyNews> {
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: TextField(
+                    child: MyWdgTextField(
+                      hintText: 'Search news by title...',
                       controller: _searchController,
                       onSubmitted: (value) {
                         setState(() {
                           _searchQuery = value;
                         });
                         _onSearchChanged();
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search news by title...',
-                        prefixIcon:
-                            const Icon(Icons.search, color: Colors.grey),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {
-                                    _searchQuery = "";
-                                  });
-                                  _onSearchChanged();
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 15),
-                      ),
-                    ),
+                      },),
                   ),
                 ),
 
@@ -190,12 +176,20 @@ class _DailyNewsState extends State<DailyNews> {
                     child: Row(
                       children: [
                         Expanded(
-                            child: _buildFeaturedCard(
-                                context, filteredArticles[0])),
+                            child: MywdgFeaturedcard(
+                              article: filteredArticles[0],
+                              onPressed: () {
+                                _onArticlePressed(context, filteredArticles[0]);
+                              },
+                            )),
                         const SizedBox(width: 10),
                         Expanded(
-                            child: _buildFeaturedCard(
-                                context, filteredArticles[1])),
+                            child: MywdgFeaturedcard(
+                              article: filteredArticles[1],
+                              onPressed: () {
+                                _onArticlePressed(context, filteredArticles[1]);
+                              },
+                            )),
                       ],
                     ),
                   ),
@@ -257,32 +251,17 @@ class _DailyNewsState extends State<DailyNews> {
                     itemCount: _categories.length,
                     itemBuilder: (context, index) {
                       final category = _categories[index];
-                      final isSelected = _selectedCategory == category;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: ChoiceChip(
-                          label: Text(category),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                _selectedCategory = category;
-                              });
-                              _onSearchChanged();
-                            }
-                          },
-                          selectedColor: Colors.black,
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                          backgroundColor: Colors.grey[200],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
+                      final isSelected = _selectedCategory == category.label;
+                      return MywdgChip(
+                        text: category.label,
+                        icon: category.icon,
+                        isSelected: isSelected,
+                        onTap: () {
+                          setState(() {
+                            _selectedCategory = category.label;
+                          });
+                          _onSearchChanged();
+                        },
                       );
                     },
                   ),
@@ -313,49 +292,6 @@ class _DailyNewsState extends State<DailyNews> {
     );
   }
 
-  Widget _buildFeaturedCard(BuildContext context, ArticleEntity article) {
-    return GestureDetector(
-      onTap: () => _onArticlePressed(context, article),
-      child: Container(
-        height: 200,
-        width: double.maxFinite,
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          image: DecorationImage(
-            image: NetworkImage(article.urlToImage ?? ''),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.3),
-              BlendMode.darken,
-            ),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              article.author ?? 'Unknown',
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              article.title ?? '',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Butler',
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   void _onArticlePressed(BuildContext context, ArticleEntity article) {
     Navigator.pushNamed(context, '/ArticleDetails', arguments: article);

@@ -16,23 +16,29 @@ class MywdgAvatarimage extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.blue, width: 3),
+            border: Border.all(color: const Color.fromARGB(255, 0, 0, 0), width: 3),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(7),
-            child: CachedNetworkImage(
-              imageUrl: urlImage,
-              fit: BoxFit.cover,
-              errorWidget: (context, url, error) => CachedNetworkImage(
-                imageUrl:
-                    'https://cdn.pixabay.com/photo/2013/07/12/15/07/hat-149479_1280.png',
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: CachedNetworkImage(
+                imageUrl: urlImage,
                 fit: BoxFit.cover,
-              ),
-              placeholder: (context, url) => const Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                errorWidget: (context, url, error) => Opacity(
+                  opacity: 0.3,
+                  child: CachedNetworkImage(
+                    imageUrl:
+                        'https://cdn.pixabay.com/photo/2013/07/12/15/07/hat-149479_1280.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                placeholder: (context, url) => const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
               ),
             ),
