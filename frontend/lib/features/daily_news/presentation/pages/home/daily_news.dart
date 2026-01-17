@@ -36,7 +36,6 @@ class Category {
   });
 }
 
-
 class _DailyNewsState extends State<DailyNews> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
@@ -161,11 +160,12 @@ class _DailyNewsState extends State<DailyNews> {
                           _searchQuery = value;
                         });
                         _onSearchChanged();
-                      },),
+                      },
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 15),
 
                 // 3. (Last 2 articles)
                 if (filteredArticles.length >= 2)
@@ -177,70 +177,88 @@ class _DailyNewsState extends State<DailyNews> {
                       children: [
                         Expanded(
                             child: MywdgFeaturedcard(
-                              article: filteredArticles[0],
-                              onPressed: () {
-                                _onArticlePressed(context, filteredArticles[0]);
-                              },
-                            )),
+                          article: filteredArticles[0],
+                          onPressed: () {
+                            _onArticlePressed(context, filteredArticles[0]);
+                          },
+                        )),
                         const SizedBox(width: 10),
                         Expanded(
                             child: MywdgFeaturedcard(
-                              article: filteredArticles[1],
-                              onPressed: () {
-                                _onArticlePressed(context, filteredArticles[1]);
-                              },
-                            )),
+                          article: filteredArticles[1],
+                          onPressed: () {
+                            _onArticlePressed(context, filteredArticles[1]);
+                          },
+                        )),
                       ],
                     ),
                   ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 15),
 
                 // 4. Banner Promotions
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.blueAccent, Colors.indigo],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 3,
+                      ),
                     ),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Community Hub',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                    child: Row(children: [
+                      Expanded(
+                          child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.newspaper,
+                                    size: 20, color: Colors.white),
+                                const SizedBox(width: 5),
+                                Text(
+                                  'News Hub',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Here you can find the latest news, publish and expand your knowledge on topics with the news community.',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
+                          const SizedBox(height: 10),
+                          Text(
+                            'Here you can find the latest news, publish your own posts',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      )),
+                      const SizedBox(width: 20),
+                      Image.asset('assets/images/not_1.png',
+                          width: 100, height: 100),
+                    ]),
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 15),
 
                 // 5. Categories Section
                 Container(
@@ -267,7 +285,7 @@ class _DailyNewsState extends State<DailyNews> {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 15),
 
                 // 6. General Feed
                 ListView.builder(
@@ -275,7 +293,7 @@ class _DailyNewsState extends State<DailyNews> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: filteredArticles.length,
                   itemBuilder: (context, index) {
-                    return ArticleWidget(
+                    return MywdgArticleTile(
                       article: filteredArticles[index],
                       onArticlePressed: (article) =>
                           _onArticlePressed(context, article),
@@ -291,7 +309,6 @@ class _DailyNewsState extends State<DailyNews> {
       },
     );
   }
-
 
   void _onArticlePressed(BuildContext context, ArticleEntity article) {
     Navigator.pushNamed(context, '/ArticleDetails', arguments: article);

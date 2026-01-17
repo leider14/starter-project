@@ -84,7 +84,10 @@ class AuthRepositoryImpl implements AuthRepository {
       String? photoUrl;
       if (image != null) {
         final ref = _storage.ref().child('users/${user.uid}/profile.jpg');
-        await ref.putFile(image);
+        final metadata = SettableMetadata(
+          contentType: 'image/jpeg',
+        );
+        await ref.putFile(image, metadata);
         photoUrl = await ref.getDownloadURL();
       }
 
@@ -130,7 +133,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (image != null) {
         final ref = _storage.ref().child('users/${user.uid}/profile.jpg');
-        await ref.putFile(image);
+        final metadata = SettableMetadata(
+          contentType: 'image/jpeg',
+        );
+        await ref.putFile(image, metadata);
         updates['photoUrl'] = await ref.getDownloadURL();
       }
 

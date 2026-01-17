@@ -16,17 +16,14 @@ class SavedArticles extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar:   MyWdgAppbar(
+      title: 'Saved Articles',
+      showBackButton: showBackButton,
+    ),
       body: _buildBody(),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return MyWdgAppbar(
-      title: 'Saved Articles',
-      showBackButton: showBackButton,
-    );
-  }
 
   Widget _buildBody() {
     return BlocBuilder<LocalArticleBloc, LocalArticlesState>(
@@ -45,7 +42,7 @@ class SavedArticles extends HookWidget {
     if (articles.isEmpty) {
       return const Center(
           child: Text(
-        'NO SAVED ARTICLES',
+        'You have\'t saved any items yet',
         style: TextStyle(color: Colors.black),
       ));
     }
@@ -53,7 +50,7 @@ class SavedArticles extends HookWidget {
     return ListView.builder(
       itemCount: articles.length,
       itemBuilder: (context, index) {
-        return ArticleWidget(
+        return MywdgArticleTile(
           article: articles[index],
           isRemovable: true,
           onRemove: (article) => _onRemoveArticle(context, article),

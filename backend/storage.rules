@@ -2,6 +2,41 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    //TODO: WRITE ANY NECESSARY STORAGE RULES HERE
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
     }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Article thumbnails in media/articles/ folder
+    match /media/articles/{articleImageId} {
+      // Anyone can read article images (public access)
+      allow read: if true;
+      
+      // Only authenticated users can upload article images
+      // Allow write if user is authenticated and file is under 5MB
+      allow write: if isAuthenticated()
+        && request.resource.size < 5 * 1024 * 1024; // Max 5MB
+    }
+    
+    // User profile images in users/{userId}/ folder
+    match /users/{userId}/{fileName} {
+      // Anyone can read user profile images (public access)
+      allow read: if true;
+      
+      // Users can upload/update only their own profile image
+      allow write: if isOwner(userId)
+        && request.resource.size < 5 * 1024 * 1024; // Max 5MB
+    }
+    
+    // Deny access to any other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
 }

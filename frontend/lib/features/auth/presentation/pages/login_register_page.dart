@@ -37,12 +37,36 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
   }
 
   void _submit() {
+    if (_emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Email is required')),
+      );
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Password is required')),
+      );
+      return;
+    }
     if (_isLogin) {
       context.read<AuthBloc>().add(AuthSignInRequested(
             _emailController.text.trim(),
             _passwordController.text.trim(),
           ));
     } else {
+      if (_nameController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Name is required')),
+        );
+        return;
+      }
+      if (_bioController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Bio is required')),
+        );
+        return;
+      }
       context.read<AuthBloc>().add(AuthSignUpRequested(
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
@@ -95,12 +119,14 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                   MyWdgTextField(
                     title: 'Full Name',
                     controller: _nameController,
+                    isRequired: true,
                     hintText: 'Your name',
                   ),
                   const SizedBox(height: 16),
                   MyWdgTextField(
                     title: 'Bio',
                     controller: _bioController,
+                    isRequired: true,
                     hintText: 'Tell us about yourself',
                   ),
                   const SizedBox(height: 16),
@@ -108,6 +134,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                 MyWdgTextField(
                   title: 'Email',
                   controller: _emailController,
+                  isRequired: true,
                   hintText: 'you@example.com',
                 ),
                 const SizedBox(height: 16),
@@ -115,6 +142,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                   title: 'Password',
                   controller: _passwordController,
                   hintText: '••••••••',
+                  isRequired: true,
                   obscureText: true,
                 ),
                 const SizedBox(height: 32),

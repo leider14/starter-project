@@ -16,7 +16,7 @@ class MywdgAvatarimage extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color.fromARGB(255, 0, 0, 0), width: 3),
+            border: Border.all(color: Colors.grey.shade300, width: 3),
           ),
           child: Padding(
             padding: const EdgeInsets.all(2.0),

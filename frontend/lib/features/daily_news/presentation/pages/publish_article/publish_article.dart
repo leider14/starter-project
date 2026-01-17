@@ -9,6 +9,8 @@ import 'package:news_app_clean_architecture/injection_container.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/auth_state.dart';
 import '../../bloc/article/publish/publish_article_cubit.dart';
+import '../../bloc/article/remote/remote_article_bloc.dart';
+import '../../bloc/article/remote/remote_article_event.dart';
 
 class PublishArticlePage extends StatefulWidget {
   const PublishArticlePage({Key? key}) : super(key: key);
@@ -54,21 +56,100 @@ class _PublishArticlePageState extends State<PublishArticlePage> {
     }
   }
 
+  // Verifica si hay contenido en los campos
+  bool _hasContent() {
+    return _titleController.text.isNotEmpty ||
+        _contentController.text.isNotEmpty ||
+        _descriptionController.text.isNotEmpty ||
+        _urlController.text.isNotEmpty ||
+        _image != null;
+  }
+
+  // Muestra diálogo de confirmación al salir
+  Future<bool> _onWillPop() async {
+    if (!_hasContent()) {
+      return true; // No hay contenido, puede salir sin confirmación
+    }
+
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+          '¿Estás seguro de salir?',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: const Text(
+          'Al salir no guardarás el progreso de este artículo nuevo.',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'No',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Descartar',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return shouldExit ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => sl<PublishArticleCubit>(),
-      child: Scaffold(
-        appBar: _buildAppBar(context),
-        body: _buildBody(context),
-        bottomNavigationBar: _buildBottomCTA(context),
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, dynamic result) async {
+          if (didPop) return;
+          
+          final shouldPop = await _onWillPop();
+          if (shouldPop && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Scaffold(
+          appBar: _buildAppBar(context),
+          body: _buildBody(context),
+          bottomNavigationBar: _buildBottomCTA(context),
+        ),
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return const MyWdgAppbar(
+    return MyWdgAppbar(
       title: 'Publish Article',
+      onBackTapped: () async {
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
     );
   }
 
@@ -221,8 +302,7 @@ class _PublishArticlePageState extends State<PublishArticlePage> {
             helpText:
                 'Escribe aquí el cuerpo de la noticia. Sé detallado y directo.',
           ),
-
-          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+          SizedBox(height: 80),
         ],
       ),
     );
@@ -232,6 +312,8 @@ class _PublishArticlePageState extends State<PublishArticlePage> {
     return BlocConsumer<PublishArticleCubit, PublishArticleState>(
       listener: (context, state) {
         if (state is PublishArticleSuccess) {
+          context.read<RemoteArticlesBloc>().add(const GetArticles());
+          
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Article published successfully!')),
           );

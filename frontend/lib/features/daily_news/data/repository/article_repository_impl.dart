@@ -73,7 +73,13 @@ class ArticleRepositoryImpl implements ArticleRepository {
           print("---------------");
           print(storageRef);
           print("---------------");
-          await storageRef.putFile(image);
+          
+          // Upload with metadata to ensure contentType is set
+          final metadata = SettableMetadata(
+            contentType: 'image/jpeg',
+          );
+          
+          await storageRef.putFile(image, metadata);
           print("---------------");
           print("Image uploaded successfully");
           print("---------------");
@@ -86,6 +92,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
         print("---------------");
         print(e);
         print("---------------");
+        rethrow; // Re-throw to handle error properly
       }
 
       // 2. Save article to Firestore
@@ -100,6 +107,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
         'url': article.url ?? '',
         'authorImage': article.authorImage ?? '',
         'category': article.category ?? 'General',
+        'likes': [],
       });
     } catch (e) {
       print(e);

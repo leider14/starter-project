@@ -1,10 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:news_app_clean_architecture/core/constants/constants.dart';
+import 'package:news_app_clean_architecture/features/daily_news/data/models/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_appbar.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/mywdg_articletile.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/auth/domain/usecases/get_user.dart';
+import 'package:news_app_clean_architecture/features/auth/presentation/widgets/mywdg_tilebutton.dart';
 import 'package:news_app_clean_architecture/injection_container.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
@@ -109,7 +113,7 @@ class ProfilePage extends StatelessWidget {
                       backgroundColor: Colors.grey[200],
                       backgroundImage:
                           user.photoUrl != null && user.photoUrl!.isNotEmpty
-                              ? NetworkImage(user.photoUrl!)
+                              ? CachedNetworkImageProvider(user.photoUrl!)
                               : null,
                       child: user.photoUrl == null || user.photoUrl!.isEmpty
                           ? const Icon(Icons.person,
@@ -134,6 +138,38 @@ class ProfilePage extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[600], fontSize: 16),
               ),
             ),
+
+            if (isOwnProfile) ...[
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    MyWdgTileButton(
+                      text: "Logout",
+                      icon: Icons.logout,
+                      color: Colors.red,
+                      onPressed: () {
+                        context.read<AuthBloc>().add(AuthSignOutRequested());
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 16),
+                    MyWdgTileButton(
+                      text: "Sobre nosotros",
+                      icon: Icons.info_outline,
+                      color: Colors.blue,
+                      onPressed: () async {
+                        await launchUrlString('https://www.yodev.com.co');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const Divider(height: 40, thickness: 1),
             Padding(
               padding: const EdgeInsets.only(left: 20, bottom: 10),
@@ -146,36 +182,55 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-            FutureBuilder<DataState<List<ArticleEntity>>>(
-              future: sl<ArticleRepository>().getArticlesByUser(user.uid!),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('articles')
+                  .where('userId', isEqualTo: user.uid)
+                  .orderBy('publishedAt', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (snapshot.hasData && snapshot.data is DataSuccess) {
-                  final articles = snapshot.data!.data!;
-                  if (articles.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text('No articles published yet.'),
-                    );
-                  }
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: articles.length,
-                    itemBuilder: (context, index) {
-                      return ArticleWidget(
-                        article: articles[index],
-                        onArticlePressed: (article) {
-                          Navigator.pushNamed(context, '/ArticleDetails',
-                              arguments: article);
-                        },
-                      );
-                    },
+
+                if (snapshot.hasError) {
+                  return const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text('Error loading articles'),
                   );
                 }
-                return const Text('Error loading articles');
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text('No articles published yet.'),
+                  );
+                }
+
+                final articles = snapshot.data!.docs.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  return ArticleModel.fromJson({
+                    ...data,
+                    'firestoreId': doc.id,
+                    'urlToImage': data['thumbnailURL'] ?? kDefaultImage,
+                    'likes': data['likes'] ?? [],
+                  });
+                }).toList();
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: articles.length,
+                  itemBuilder: (context, index) {
+                    return MywdgArticleTile(
+                      article: articles[index],
+                      onArticlePressed: (article) {
+                        Navigator.pushNamed(context, '/ArticleDetails',
+                            arguments: article);
+                      },
+                    );
+                  },
+                );
               },
             ),
           ],

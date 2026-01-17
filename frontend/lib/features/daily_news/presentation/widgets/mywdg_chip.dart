@@ -12,17 +12,15 @@ class MywdgChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
+      child: Container(
         height: 10,
-        duration: Duration(milliseconds: 200),
-        curve: Curves.decelerate,
         margin: EdgeInsets.only(right: 10),
         padding: EdgeInsets.symmetric(horizontal: 15,),
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? Colors.black : Colors.grey.shade300,
+            color: Colors.grey.shade300,
             width: 3,
           ),
         ),

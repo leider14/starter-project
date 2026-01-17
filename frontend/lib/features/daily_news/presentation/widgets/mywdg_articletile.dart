@@ -12,25 +12,25 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/wid
 import 'package:news_app_clean_architecture/injection_container.dart';
 import '../../domain/entities/article.dart';
 
-class ArticleWidget extends StatefulWidget {
+class MywdgArticleTile extends StatefulWidget {
   final ArticleEntity? article;
   final bool? isRemovable;
   final void Function(ArticleEntity article)? onRemove;
   final void Function(ArticleEntity article)? onArticlePressed;
 
-  const ArticleWidget({
-    Key? key,
+  const MywdgArticleTile({
+    super.key,
     this.article,
     this.onArticlePressed,
     this.isRemovable = false,
     this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
-  State<ArticleWidget> createState() => _ArticleWidgetState();
+  State<MywdgArticleTile> createState() => _MywdgArticleTileState();
 }
 
-class _ArticleWidgetState extends State<ArticleWidget> {
+class _MywdgArticleTileState extends State<MywdgArticleTile> {
   late bool _isLiked;
   late int _likesCount;
 
@@ -248,9 +248,9 @@ class _ArticleWidgetState extends State<ArticleWidget> {
           builder: (context, state) {
             bool isBookmarked = false;
             if (state is LocalArticlesDone) {
-              isBookmarked = state.articles!.any((a) =>
-                  a.url == widget.article!.url ||
-                  (a.title == widget.article!.title &&
+                  isBookmarked = state.articles!.any((a) =>
+                    a.url == widget.article!.url ||
+                    (a.title == widget.article!.title &&
                       a.author == widget.article!.author));
             }
             return GestureDetector(
@@ -274,6 +274,7 @@ class _ArticleWidgetState extends State<ArticleWidget> {
         const SizedBox(width: 5),
         
         // Like
+        if (widget.article?.firestoreId != null && widget.article!.firestoreId!.isNotEmpty) 
         GestureDetector(
           onTap: _toggleLike,
           child: Container(
