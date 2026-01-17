@@ -96,6 +96,12 @@ La búsqueda podría mejorarse con una solución de búsqueda full-text más rob
 
 *Video mostrando el funcionamiento completo de la aplicación, incluyendo autenticación, publicación de artículos, navegación entre pantallas y funcionalidades principales.*
 
+**En caso de que el video no funcione, puedes verlo en Google Drive:**
+
+<a href="https://drive.google.com/file/d/1lzkM8QZx9Qx3gIoNYD9m1Bq7wP4hWMOg/view?usp=sharing" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #4285F4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 16px;">
+  📺 Ver video en Google Drive
+</a>
+
 **Descargar APK (Versión 1.0.0+2)**
 
 <a href="assets/app-release_1.0.0+2.apk" download style="display: inline-block; padding: 12px 24px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 16px;">
